@@ -4,15 +4,11 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace CutURLTask.Controllers
 {
-    public class HomeController : Controller
+    public class CuturlController : Controller
     {
         public IActionResult Index()
         {
-            return View();
-        }
-
-        public IActionResult Privacy()
-        {
+            ViewData["Title"] = "CutURL";
             return View();
         }
 
