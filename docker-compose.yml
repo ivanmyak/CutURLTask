@@ -1,15 +1,19 @@
+﻿name: cuturl-compose
+
 services:
+
   cuturltask:
+    container_name: cuturl-container
     image: ${DOCKER_REGISTRY-}cuturltask
     build:
       context: .
       dockerfile: CutURLTask/Dockerfile
-
+      # Можно было бы вообще поставить зависимость сервиса с API от DB (depends_on)
   mariadb:
+    container_name: cuturl_mariadb
+    # при работе с образами докера, лучше придерживаться выбранной версии (вплоть до minor-patch областей версионности)
     image: mariadb:11.4.2
-    container_name: mariadb_urlshortener
     restart: always
-
-
+    
 volumes:
   mariadb_data:

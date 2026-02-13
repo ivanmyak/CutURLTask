@@ -7,18 +7,19 @@
         "ASPNETCORE_ENVIRONMENT": "Development"
       },
       "dotnetRunMessages": true,
-      "applicationUrl": "http://localhost:5008"
+      "applicationUrl": "http://localhost:8001"
     },
     "Container (Dockerfile)": {
       "commandName": "Docker",
       "launchBrowser": true,
       "launchUrl": "{Scheme}://{ServiceHost}:{ServicePort}",
       "environmentVariables": {
-        "ASPNETCORE_HTTP_PORTS": "8080"
+        "ASPNETCORE_HTTP_PORTS": "8000"
       },
       "publishAllPorts": true,
       "useSSL": false
     }
   },
+  // тут тоже можно скачать файл-схемы, чтобы не лезть лишние разы в интернеты, ну да ладно
   "$schema": "https://json.schemastore.org/launchsettings.json"
 }

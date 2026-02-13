@@ -1,13 +1,14 @@
-services:
+﻿services:
   cuturltask:
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
-      - ASPNETCORE_HTTP_PORTS=8080
+      - ASPNETCORE_HTTP_PORTS=8000
     ports:
-      - "8080"
+      - "8000"
 
   mariadb:
-    environment:
+    environment: 
+    # По-хорошему, я всегда это в секреты docker.env и user-secrets прячу, но для задания оставлю так
     - MYSQL_ROOT_PASSWORD="Pasw12!_#34Root"
     - MYSQL_DATABASE="CuturlDb"    
     - MYSQL_USER="CuturlAdmiral"
