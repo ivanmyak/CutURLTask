@@ -1,0 +1,18 @@
+services:
+  cuturltask:
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_HTTP_PORTS=8080
+    ports:
+      - "8080"
+
+  mariadb:
+    environment:
+    - MYSQL_ROOT_PASSWORD="Pasw12!_#34Root"
+    - MYSQL_DATABASE="CuturlDb"    
+    - MYSQL_USER="CuturlAdmiral"
+    - MYSQL_PASSWORD="Password_123!"
+    ports:
+    - "3306:3306"
+    volumes:
+    - mariadb_data:/var/lib/mysql

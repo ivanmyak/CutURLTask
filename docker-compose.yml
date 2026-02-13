@@ -1,0 +1,15 @@
+services:
+  cuturltask:
+    image: ${DOCKER_REGISTRY-}cuturltask
+    build:
+      context: .
+      dockerfile: CutURLTask/Dockerfile
+
+  mariadb:
+    image: mariadb:11.4.2
+    container_name: mariadb_urlshortener
+    restart: always
+
+
+volumes:
+  mariadb_data:
