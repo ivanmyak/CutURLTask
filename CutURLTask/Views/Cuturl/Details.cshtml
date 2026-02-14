@@ -1,0 +1,14 @@
+﻿<div class="card shadow p-4" style="min-width: 320px; max-width: 500px;">
+    <h3 class="text-center mb-4">Информация о ссылке</h3>
+    <table class="table table-bordered">
+        <tr><th>Длинный URL</th><td>@Model.LongUrl</td></tr>
+        <tr><th>Короткий URL</th><td>@Model.ShortUrl</td></tr>
+        <tr><th>Дата создания</th><td>@Model.CreatedAt.ToString("yyyy-MM-dd HH:mm")</td></tr>
+        <tr><th>Количество переходов</th><td>@Model.ClickCount</td></tr>
+    </table>
+
+    <div class="d-flex justify-content-between">
+        <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-primary">Редактировать</a>
+        <a asp-action="Delete" asp-route-id="@Model.Id" class="btn btn-danger">Удалить</a>
+    </div>
+</div>

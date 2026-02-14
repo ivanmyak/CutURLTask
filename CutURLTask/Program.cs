@@ -16,9 +16,16 @@ app.UseAuthorization();
 
 app.MapStaticAssets();
 
+// Маршрут для коротких ссылок 
+app.MapControllerRoute(
+    name: "short",
+    pattern: "{code}",
+    defaults: new { controller = "Cuturl", action = "RedirectToUrl" });
+
+
 app.MapControllerRoute(
     name: "default",
-    pattern: "{controller=Cuturl}/{action=Index}/{id?}")
+    pattern: "{controller=Cuturl}/{action=Generate}/{id?}")
     .WithStaticAssets();
 
 

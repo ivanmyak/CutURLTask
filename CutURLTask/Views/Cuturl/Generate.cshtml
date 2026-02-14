@@ -1,0 +1,45 @@
+﻿@model UrlViewModel
+
+<div id="lookupContainer" class="d-flex justify-content-center align-items-center vh-100">
+    <div class="card shadow p-4" style="min-width: 320px; max-width: 400px;">
+        <h3 class="text-center mb-4">Введите вашу строку</h3>
+        <form method="post" asp-action="Lookup">
+            <div class="form-group mb-3">
+                <label for="longurl">Длинный URL</label>
+                <input type="url" class="form-control" id="longurl" name="longurl" placeholder="long URL" />
+            </div>
+            <div class="form-group mb-3">
+                <label for="shorturl">Короткий URL</label>
+                <input type="url" class="form-control" id="shorturl" name="shorturl" placeholder="short URL" />
+                <span asp-validation-for="ShortURL" class="text-danger"></span>
+            </div>
+            <button id="subbut" type="submit" class="btn btn-primary w-100" disabled>Сгенерировать | Найти</button>
+        </form>
+    </div>
+</div>
+
+
+
+@section Scripts {
+    <script>
+        $(document).on("input", "#longurl", function () {
+            if ($(this).val().length > 0) {
+                $("#shorturl").prop("disabled", true);
+                $("#subbut").prop("disabled", false);
+            } else {
+                $("#shorturl").prop("disabled", false);
+                $("#subbut").prop("disabled", true);
+            }
+        });
+
+        $(document).on("input", "#shorturl", function () {
+            if ($(this).val().length > 0) {
+                $("#longurl").prop("disabled", true);
+                $("#subbut").prop("disabled", false);
+            } else {
+                $("#longurl").prop("disabled", false);
+                $("#subbut").prop("disabled", true);
+            }
+        });
+    </script>
+}
