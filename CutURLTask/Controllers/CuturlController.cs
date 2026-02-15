@@ -51,7 +51,7 @@ namespace CutURLTask.Controllers
             // Если пришёл короткий код
             if (!string.IsNullOrEmpty(model.ShortURL?.OriginalString))
             {
-                code = GeneratorService.ExtractCode(model.ShortURL.OriginalString);
+                code = GeneratorService.ExtractCode(model.ShortURL);
                 urlRecord = await _context.UrlRecords
                     .AsNoTracking()
                     .FirstOrDefaultAsync(u => u.Code == code);

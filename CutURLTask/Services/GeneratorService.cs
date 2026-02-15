@@ -48,17 +48,12 @@ namespace CutURLTask.Services
         /// </summary>
         /// <param name="shortUrl">короткая строка-url</param>
         /// <returns></returns>
-        public static string ExtractCode(string shortUrl)
+        public static string ExtractCode(Uri shortUrl)
         {
-            if (Uri.TryCreate(shortUrl, UriKind.Absolute, out var uri))
-            { // Берём последний сегмент пути
-                return uri.Segments.Last().Trim('/');
-            }
-            else
-            {
-                // Если пришёл просто код без домена 
-                return shortUrl.Trim('/');
-            }
+            return Uri.UnescapeDataString(shortUrl.AbsolutePath)
+                    .Trim('/')
+                    .Split('/')
+                    .Last();
         }
 
 
