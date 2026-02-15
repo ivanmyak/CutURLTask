@@ -1,14 +1,87 @@
-﻿<div class="card shadow p-4" style="min-width: 320px; max-width: 500px;">
-    <h3 class="text-center mb-4">Информация о ссылке</h3>
-    <table class="table table-bordered">
-        <tr><th>Длинный URL</th><td>@Model.LongUrl</td></tr>
-        <tr><th>Короткий URL</th><td>@Model.ShortUrl</td></tr>
-        <tr><th>Дата создания</th><td>@Model.CreatedAt.ToString("yyyy-MM-dd HH:mm")</td></tr>
-        <tr><th>Количество переходов</th><td>@Model.ClickCount</td></tr>
-    </table>
+﻿@model CutURLTask.Models.DetailsUrlViewModel
 
-    <div class="d-flex justify-content-between">
-        <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-primary">Редактировать</a>
-        <a asp-action="Delete" asp-route-id="@Model.Id" class="btn btn-danger">Удалить</a>
+<div class="url-details">
+    <h2>Информация о ссылке</h2>
+
+    <div class="form-group">
+        <label>Короткая ссылка:</label>
+        <div class="input-group">
+            <input type="text" class="form-control" value="@Model.ShortUrl" readonly />
+            <button type="button" class="btn btn-outline-secondary" onclick="copyToClipboard('@Model.ShortUrl')">
+                Скопировать
+            </button>
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label>Длинная ссылка:</label>
+        <textarea id="longUrl" class="form-control" rows="1"
+                  oninput="autoResize(this); toggleEditButton()">@Model.LongUrl</textarea>
+        <button id="editBtn" type="button" class="btn btn-primary mt-2" disabled onclick="submitEdit()" title="Сохранить изменения">
+            Редактировать
+        </button>
+    </div>
+
+    <div class="form-group">
+        <label>Использований:</label>
+        <input type="text" class="form-control" value="@Model.UsedCount" readonly />
+    </div>
+
+    <div class="form-group">
+        <label>Создана:</label>
+        <input type="text" class="form-control" value="@Model.CreatedAt.ToString("g")" readonly />
     </div>
 </div>
+
+@section Scripts {
+    <script>
+        // Копирование короткой ссылки
+        function copyToClipboard(text) {
+            navigator.clipboard.writeText(text).then(() => {
+                alert("Ссылка скопирована в буфер обмена!");
+            });
+        }
+
+        // Авто-расширение textarea
+        function autoResize(textarea) {
+            textarea.style.height = "auto";
+            textarea.style.height = textarea.scrollHeight + "px";
+        }
+
+        // Проверка изменения длинного URL
+        const originalLongUrl = "@Model.LongUrl";
+        function toggleEditButton() {
+            const current = document.getElementById("longUrl").value;
+            const btn = document.getElementById("editBtn");
+            btn.disabled = (current === originalLongUrl);
+        }
+
+        // Отправка изменений
+        function submitEdit() {
+            const newUrl = document.getElementById("longUrl").value;
+            fetch('/Cuturl/Edit', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(
+                    {
+                        Id: @Model.Id, 
+                        LongUrl: newUrl
+                    }
+                )
+            })
+            .then(response => {
+                if (response.ok) {
+                    alert("Ссылка обновлена!");
+                    location.reload();
+                } else {
+                    alert("Ошибка при обновлении");
+                }
+            });
+        }
+
+        // Инициализация авто-ресайза при загрузке
+        window.onload = () => {
+            autoResize(document.getElementById("longUrl"));
+        };
+    </script>
+}

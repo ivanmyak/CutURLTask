@@ -19,7 +19,6 @@ string goodconn = Environment.ExpandEnvironmentVariables(conn) ?? throw new Inva
 builder.Services.AddDbContext<CutUrlDbContext>(options =>
     options.UseMySQL(goodconn));
 
-builder.Services.AddScoped<GeneratorService>();
 builder.Services.AddRazorPages();
 builder.Services.AddControllersWithViews();
 
@@ -75,6 +74,11 @@ app.MapControllerRoute(
     pattern: "{code}",
     defaults: new { controller = "Cuturl", action = "RedirectToUrl" });
 
+// Маршрут для Информационного представления
+app.MapControllerRoute(
+    name: "details", 
+    pattern: "Details/{code}",
+    defaults: new { controller = "Cuturl", action = "Details" });
 
 app.MapControllerRoute(
     name: "default",

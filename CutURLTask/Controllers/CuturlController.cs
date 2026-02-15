@@ -1,11 +1,23 @@
-﻿using System.Diagnostics;
+﻿using CutURLTask.Data;
+using CutURLTask.Entities;
 using CutURLTask.Models;
+using CutURLTask.Services;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using System.Diagnostics;
+using System.Text.Json;
+using System.Threading.Tasks;
 
 namespace CutURLTask.Controllers
 {
     public class CuturlController : Controller
     {
+        private readonly CutUrlDbContext _context;
+        public CuturlController(CutUrlDbContext context)
+        {
+            _context = context;
+        }
+
         public IActionResult Generate()
         {
             ViewData["Title"] = "CutURL Main";
@@ -26,27 +38,107 @@ namespace CutURLTask.Controllers
         /// если нет (и ссылка была короткой) - сообщение о не-нахождении.
         /// если нет (и ссылка была длинной) - генерация новой и страница с информацией 
         /// </returns>
-        public IActionResult Lookup(UrlViewModel model)
+        public async Task<IActionResult> LookupAsync(UrlViewModel model)
         {
-            if (model.ShortURL != null && model.LongURL == null)
+            if (string.IsNullOrEmpty(model.ShortURL?.OriginalString) && string.IsNullOrEmpty(model.LongURL?.OriginalString))
             {
-                ModelState.AddModelError("ShortUrl", "Такой короткой строки не найдено");
+                ModelState.AddModelError("ShortUrl", "Введите короткую или длинную ссылку");
                 return View("Generate", model);
             }
+            string code;
+            UrlRecord? urlRecord = null;
+
+            // Если пришёл короткий код
+            if (!string.IsNullOrEmpty(model.ShortURL?.OriginalString))
+            {
+                code = GeneratorService.ExtractCode(model.ShortURL.OriginalString);
+                urlRecord = await _context.UrlRecords
+                    .AsNoTracking()
+                    .FirstOrDefaultAsync(u => u.Code == code);
+
+                if (urlRecord == null)
+                {
+                    ModelState.AddModelError("ShortUrl", "Такой короткой ссылки не найдено");
+                    return View("Generate", model);
+                }
+            }
+            // Если пришёл длинный URL
+            else if (model.LongURL != null)
+            {
+                string longUrl = model.LongURL.OriginalString;
+
+                urlRecord = await _context.UrlRecords
+                    .AsNoTracking()
+                    .FirstOrDefaultAsync(u => u.LongUrl == longUrl);
+
+                if (urlRecord == null)
+                {
+                    // Генерация нового кода
+                    code = await GeneratorService.GenerateCodeAsync(_context);
+
+                    urlRecord = new UrlRecord
+                    {
+                        LongUrl = longUrl,
+                        Code = code,
+                        UsedCount = 0,
+                        CreatedAt = DateTime.UtcNow
+                    };
+
+                    await _context.AddAsync(urlRecord);
+                    await _context.SaveChangesAsync();
+                }
+            }
+            string host = HttpContext.Request.Host.Value ?? "localhost";
+            TempData["DetailsModel"] = JsonSerializer.Serialize(new DetailsUrlViewModel(urlRecord!, host));
+            return RedirectToAction("Details", new { code = urlRecord?.Code });
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> DetailsAsync(string code)
+        {
+            ViewData["Title"] = "Подробности";
+            DetailsUrlViewModel? model;
+            if (TempData["DetailModel"] is string json)
+            {
+                model = JsonSerializer.Deserialize<DetailsUrlViewModel>(json);
+            }
             else
-                return View("Details");
+            {
+                if (string.IsNullOrEmpty(code))
+                {
+                    return BadRequest();
+                }
+                var urlrec = await _context.UrlRecords.FirstOrDefaultAsync(u => u.Code == code) ?? throw new("Нет такой записи в БД!");
+
+                string host = HttpContext.Request.Host.Value ?? "localhost";
+                model = new DetailsUrlViewModel(urlrec, host);
+            }
+
+            return View(model);
         }
 
-        public IActionResult Create()
+        [HttpPost]
+        public async Task<IActionResult> DetailsAsync(DetailsUrlViewModel model)
         {
+            ViewData["Title"] = "Подробности";
 
-            return View("Details");
+            return View(model);
         }
 
-        public IActionResult Edit()
+        [HttpPost]
+        public async Task<IActionResult> Edit([FromBody] EditUrlViewModel model)
         {
+            UrlRecord urlRecord = await _context.UrlRecords.FirstOrDefaultAsync(u => u.Id == model.Id) ?? throw new("Нет такой записи в БД!");
 
-            return View("Details");
+            if (urlRecord.LongUrl != model.LongUrl)
+            {
+                urlRecord.LongUrl = model.LongUrl;
+                _context.UrlRecords.Update(urlRecord);
+                await _context.SaveChangesAsync();
+            }
+
+            string host = HttpContext.Request.Host.Value ?? "localhost";
+            return View("Details", new DetailsUrlViewModel(urlRecord, host));
         }
 
         /// <summary>
@@ -54,21 +146,26 @@ namespace CutURLTask.Controllers
         /// </summary>
         /// <param name="code">Наша "короткая" ссылка</param>
         /// <returns></returns>
+        /// <remarks>И тут я задумался - нужно ли мне влазить в данный контроллер или стоит вынести данный функционал ре-роутинга в иной сервис...</remarks>
         public async Task<IActionResult> RedirectToUrl(string code)
         {
-            //var record = await _context.FindByShortUrlAsync(code);
-            //if (record == null) 
-            //    return NotFound();
-            //record.ClickCount++; 
-            //await _context.UpdateAsync(record);
-            //return Redirect(record.LongUrl);
+            var record = await _context.UrlRecords.FirstOrDefaultAsync(u => u.Code == code);
+            if (record == null)
+                return NotFound();
+            else
+            {
+                record.UsedCount++;
+                _context.Update(record);
+                await _context.SaveChangesAsync();
+            }
 
-            return NotFound();
+            return Redirect(record.LongUrl);
         }
 
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
         public IActionResult Error()
         {
+            ViewData["Title"] = "CutURL ОШИБКИ";
             return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
         }
     }
