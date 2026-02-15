@@ -141,6 +141,16 @@ namespace CutURLTask.Controllers
             return View("Details", new DetailsUrlViewModel(urlRecord, host));
         }
 
+        [HttpPost]
+        public async Task<IActionResult> Delete(int id)
+        {
+            UrlRecord urlRecord = await _context.UrlRecords.FirstOrDefaultAsync(u => u.Id == id) ?? throw new("Нет такой записи в БД!");
+            _context.Remove(urlRecord);
+            await _context.SaveChangesAsync();
+
+            return Ok();
+        }
+
         /// <summary>
         /// Наша переадресация по коротким ссылкам
         /// </summary>
