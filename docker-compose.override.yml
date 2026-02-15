@@ -3,17 +3,17 @@
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
       - ASPNETCORE_HTTP_PORTS=8000
+      - ConnectionStrings__MySQLDB=server=cuturldb;port=3306;user id=CuturlAdmiral;password=Password_123!;database=CuturlDb
     ports:
       - "8000"
 
-  mariadb:
+  cuturldb:
     environment: 
     # По-хорошему, я всегда это в секреты docker.env и user-secrets прячу, но для задания оставлю так
     - MYSQL_ROOT_PASSWORD="Pasw12!_#34Root"
     - MYSQL_DATABASE="CuturlDb"    
     - MYSQL_USER="CuturlAdmiral"
-    - MYSQL_PASSWORD="Password_123!"
     ports:
     - "3306:3306"
     volumes:
-    - mariadb_data:/var/lib/mysql
+    - mysqldb_data:/var/lib/mysql

@@ -21,12 +21,10 @@ namespace CutURLTask.Controllers
         /// <summary>
         /// Проверка ссылок
         /// </summary>
-        /// <param name="longurl">Длинный URL</param>
-        /// <param name="shorturl">Короткий URL</param>
         /// <returns>        
         /// если найдёт - страница с информацией по ссылке.
-        /// если нет (и ссылка была короткой)- сообщение о не-нахождении.
-        /// если нет (и ссылка была длинной)- генерация новой и страница с информацией 
+        /// если нет (и ссылка была короткой) - сообщение о не-нахождении.
+        /// если нет (и ссылка была длинной) - генерация новой и страница с информацией 
         /// </returns>
         public IActionResult Lookup(UrlViewModel model)
         {
@@ -42,13 +40,13 @@ namespace CutURLTask.Controllers
         public IActionResult Create()
         {
 
-            return View();
+            return View("Details");
         }
 
         public IActionResult Edit()
         {
 
-            return View();
+            return View("Details");
         }
 
         /// <summary>
